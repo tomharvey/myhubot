@@ -15,10 +15,10 @@
 
 var tumblr = require('tumblr.js');
 var client = tumblr.createClient({
-  consumer_key: 'U4oHo05i6CgGGNUnluIl7TkAFKofaDEev1DVNTc6VrLJilY4tm',
-  consumer_secret: 'HiWvmohxGv1uqXswR8FKVekGrbsCglkBGg11WPoZuZ6P9PItds',
-  token: 'lqMeWKKbzFUv5y6B1cZ2cC7KF0sLM4mKAUQsqjOiQYPeqOh19Y',
-  token_secret: '7cPfTNlZ5VEpJYNMEWBa3Z9YPiOeTD7KFwqw4eqjQ7iUfAWo8T'
+    consumer_key: process.env.TUMBLR_CONSUMER_KEY,
+    consumer_secret: process.env.TUMBLR_CONSUMER_SECRET,
+    token: process.env.TUMBLR_TOKEN,
+    token_secret: process.env.TUMBLR_TOKEN_SECRET
 });
 
 
