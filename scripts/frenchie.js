@@ -23,37 +23,42 @@ var client = tumblr.createClient({
 
 
 var main = function(robot) {
-  robot.brain.on('loaded', function(){
-    console.log('foo', robot.brain.frenchie)
+  robot.brain.on('loaded', function() {
       if (robot.brain.data.frenchie === undefined){
           robot.brain.data.frenchie = [];
       }
   });
 
 
-  robot.respond(/frenchie/i,function(msg) {
-    client.tagged("frenchie", {type: "photo", limit: 20},function(error, data){
-      if (data.length > 0){
-
+  robot.respond(/frenchie/i, function(msg) {
+    client.tagged('frenchie', {limit: 42}, function(error, data) {
+      if (data.length > 0) {
           var myurl = null;
-          data.forEach(function(post){
+          data.forEach(function(post) {
               if (myurl !== null){
                  return;
               }
 
-              if (post.photos.length>0){
+              if (post.type !== 'photo') {
+                  return;
+              }
+
+              if (post.photos.length > 0){
                   myurl = post.photos[0].original_size.url;
-                  if (robot.brain.data.frenchie.indexOf(myurl) !== -1){
+                  if (robot.brain.data.frenchie.indexOf(myurl) === -1) {
                       robot.brain.data.frenchie.push(myurl);
                       return;
-                  }
-                  else{
+                  } else {
                       myurl = null;
                   }
               }
-          })
+          });
 
-          msg.reply(myurl);
+          if (myurl === null) {
+              msg.reply("Couldn't find any frenchies :(");
+          } else {
+              msg.reply(myurl);
+          }
       }
     });
   });
