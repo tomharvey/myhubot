@@ -1,3 +1,6 @@
+https://codeship.com/projects/YOUR_PROJECT_UUID/status?branch=master
+
+
 # myhubot
 
 myhubot is a chat bot built on the [Hubot][hubot] framework. It was
