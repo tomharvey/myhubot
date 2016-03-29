@@ -344,6 +344,10 @@
     "CDSecretAccessKey" : {
       "Value" : {"Fn::GetAtt" : ["CDSAccessKey", "SecretAccessKey"]},
       "Description" : "Continuous Deployment Service Secret Access Key"
+    },
+    "ReleaseBucket" : {
+      "Value" : {"Ref" : "BotReleaseCache"},
+      "Description" : "Bucket used to hold releases"
     }
   }
 }
