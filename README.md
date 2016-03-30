@@ -1,5 +1,5 @@
-https://codeship.com/projects/YOUR_PROJECT_UUID/status?branch=master
 
+![codeship badge](https://codeship.com/projects/8130cc10-d804-0133-7930-2a00185afc36/status?branch=master)
 
 # myhubot
 
