@@ -25,7 +25,7 @@
       "Type": "String",
       "MinLength": "9",
       "MaxLength": "18",
-      "Default": "87.81.202.222/32",
+      "Default": "5.148.56.74/32",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "must be a valid IP CIDR range of the for x.x.x.x/x."
     }
@@ -38,8 +38,7 @@
     },
 
     "AWSRegionArch2AMI" : {
-      "eu-west-1"        : {"HVM64" : "ami-f95ef58a"},
-      "eu-central-1"     : {"HVM64" : "ami-87564feb"}
+      "eu-west-1"        : {"HVM64" : "ami-f95ef58a"}
     }
 
   },
@@ -86,7 +85,7 @@
       },
       "UpdatePolicy": {
         "AutoScalingRollingUpdate": {
-          "MinInstancesInService": "1",
+          "MinInstancesInService": "0",
           "MaxBatchSize": "1",
           "PauseTime" : "PT15M",
           "WaitOnResourceSignals": "true"
@@ -140,7 +139,7 @@
           "install_codedeploy" : {
             "commands" : {
               "01_install_git" : {
-                "command" : "curl -sSL https://raw.githubusercontent.com/tomharvey/bootstraps/master/cfn-bootstrap-install.sh | bash"
+                "command" : "curl -sSL https://raw.githubusercontent.com/tomharvey/bootstraps/master/codedeploy-agent-install.sh | bash"
                 }
             }
 
@@ -152,6 +151,7 @@
                           { "Fn::FindInMap" : [ "AWSInstanceType2Arch", { "Ref" : "InstanceType" }, "Arch" ] } ] },
         "InstanceType"   : { "Ref" : "InstanceType" },
         "SecurityGroups" : [ {"Ref" : "BotServerSecurityGroup"} ],
+        "IamInstanceProfile" : {"Ref" : "BotInstanceIAM"},
         "KeyName"        : { "Ref" : "KeyName" },
         "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
                        "#!/bin/bash -xe\n",
@@ -169,6 +169,39 @@
                        "         --region ", { "Ref" : "AWS::Region" }, "\n"
         ]]}}
       }
+    },
+
+    "BotInstanceIAM" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "DependsOn" : "CDInstanceRole",
+      "Properties" : {
+        "Path" : { "Fn::Join" : ["", ["/", { "Ref" : "AWS::StackName" }, "-CDInstance/"]]},
+        "Roles" : [{"Ref" : "CDInstanceRole"}]
+      }
+    },
+
+    "CDInstanceRole" : { 
+       "Type": "AWS::IAM::Role",
+       "Properties": {
+          "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {
+                  "Service": [
+                    "s3.amazonaws.com",
+                    "ec2.amazonaws.com",
+                    "codedeploy.amazonaws.com"
+                  ]
+                },
+                "Action": "sts:AssumeRole"
+              }
+            ]
+          },
+          "Path" : { "Fn::Join" : ["", ["/", { "Ref" : "AWS::StackName" }, "-CodeDeployInstanceRole/"]]}
+       }
     },
 
     "BotServerSecurityGroup" : {
@@ -251,7 +284,30 @@
       "DependsOn" : ["CDSUser"]
     },
 
-    "PermissionToReleaseCache" : {
+    "PermissionToGetCodeDeployAgent" : {
+      "Type" : "AWS::IAM::Policy",
+      "DependsOn" : [ "CDInstanceRole" ],
+      "Properties" : {
+        "PolicyName" : "CodeDeployAgentGet",
+        "PolicyDocument" : {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": [
+                "arn:aws:s3:::aws-codedeploy-eu-west-1/latest/install"
+              ]
+            }
+          ]
+        },
+        "Roles" : [ { "Ref" : "CDInstanceRole" } ]
+      }
+    },
+
+    "PermissionToPutReleaseCache" : {
       "Type" : "AWS::IAM::Policy",
       "DependsOn" : [ "CDSUser" ],
       "Properties" : {
@@ -271,6 +327,29 @@
           ]
         },
         "Users" : [ { "Ref" : "CDSUser" } ]
+      }
+    },
+
+    "PermissionToGetReleaseCache" : {
+      "Type" : "AWS::IAM::Policy",
+      "DependsOn" : [ "CDInstanceRole" ],
+      "Properties" : {
+        "PolicyName" : "ReleaseCacheGet",
+        "PolicyDocument" : {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "s3:GetObject"
+              ],
+              "Resource": [
+                {"Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "BotReleaseCache" },"/*"]]}
+              ]
+            }
+          ]
+        },
+        "Roles" : [ { "Ref" : "CDInstanceRole" } ]
       }
     },
 
@@ -333,10 +412,6 @@
       "Value" : { "Ref" : "BotDeployGroup" },
       "Description" : "Bot Deployment Group Name"
     },
-    "ReleaseCacheName" : {
-      "Value" : { "Ref" : "BotReleaseCache" },
-      "Description" : "Bot Release Cache S3 Bucket"
-    },
     "CDAccessKeyId" : {
       "Value" : {"Ref" : "CDSAccessKey"},
       "Description" : "Continuous Deployment Service Access Key ID"
@@ -345,7 +420,7 @@
       "Value" : {"Fn::GetAtt" : ["CDSAccessKey", "SecretAccessKey"]},
       "Description" : "Continuous Deployment Service Secret Access Key"
     },
-    "ReleaseBucket" : {
+    "S3ReleaseBucket" : {
       "Value" : {"Ref" : "BotReleaseCache"},
       "Description" : "Bucket used to hold releases"
     }
