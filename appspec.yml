@@ -2,4 +2,4 @@ version: 0.0
 os: linux
 hooks:
   ApplicationStart:
-    - location: deploy/application-start.sh
+    - location: bin/hubot
