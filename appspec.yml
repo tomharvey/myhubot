@@ -5,4 +5,4 @@ files:
     destination: /srv/myhubot
 hooks:
   ApplicationStart:
-    - location: cd /srv/myhubot; /bin/hubot
+    - location: deploy/application-start.sh
