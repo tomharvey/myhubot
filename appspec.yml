@@ -1,5 +1,8 @@
 version: 0.0
 os: linux
+files:
+  - source: /
+    destination: /srv/myhubot
 hooks:
   ApplicationStart:
-    - location: bin/hubot
+    - location: cd /srv/myhubot; /bin/hubot
