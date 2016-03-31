@@ -60,7 +60,7 @@
         "Listeners" : [ 
           {
             "LoadBalancerPort" : "80",
-            "InstancePort" : "80",
+            "InstancePort" : "8080",
             "Protocol" : "HTTP",
             "PolicyNames" : [ "CookieBasedPolicy" ]
           }
@@ -98,7 +98,7 @@
       "Metadata" : {
         "AWS::CloudFormation::Init" : {
           "configSets" : {
-            "aws_bootstrap" : ["install_cfn", "install_codedeploy"]
+            "aws_bootstrap" : ["install_cfn", "install_codedeploy", "install_bot_dependancies"]
           },
           "install_cfn" : {
             "files": {
@@ -143,7 +143,15 @@
                 }
             }
 
+          },
+          "install_bot_dependancies" : {
+            "commands" : {
+              "01_setup_node" : {
+                "command" : "curl -sL https://deb.nodesource.com/setup | bash -"
+              }
+            }
           }
+
         }
       },
       "Properties": {
