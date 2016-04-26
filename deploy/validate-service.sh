@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl localhost:8080 >> /tmp/validation_result.log
+curl localhost/hubot >> /tmp/validation_result.log

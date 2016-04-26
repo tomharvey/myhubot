@@ -148,6 +148,15 @@
             "commands" : {
               "01_setup_node" : {
                 "command" : "curl -sL https://deb.nodesource.com/setup | bash -"
+              },
+              "02_install_packages" : {
+                "command": "apt-get install -y nginx nodejs redis-server"
+              },
+              "03_remove_default_site" : {
+                "command": "rm /etc/nginx/sites-enabled/default"
+              },
+              "04_create_dirs" : {
+                "command": "mkdir -p /{srv,etc}/myhubot"
               }
             }
           }

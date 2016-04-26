@@ -1,9 +1,4 @@
 #!/bin/bash
 
-cd /srv/myhubot
-rm -r node_modules/
-nohup bin/hubot &
-
-echo 'Bot started'
-
-exit
+/etc/init.d/nginx restart
+service hubot restart

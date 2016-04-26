@@ -1,8 +1,12 @@
 version: 0.0
 os: linux
 files:
-  - source: /
+  - source: /myhubot
     destination: /srv/myhubot
+  - source: /deploy/upstart/hubot.conf
+    destination: /etc/init/
+  - source: /deploy/nginx/hubot.vhost
+    destination: /etc/nginx/sites-enabled/
 hooks:
   ApplicationStart:
     - location: deploy/application-start.sh

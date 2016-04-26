@@ -1,0 +1,22 @@
+upstream hubot {
+  server 127.0.0.1:8999 fail_timeout=0;
+}
+
+server {
+  server_name hubot.mydomain.com;
+  root /srv/hubot;
+
+  location / {
+    index index.htm;
+  }
+
+  location /hubot {
+    try_files $uri @hubot;
+  }
+
+  location @hubot {
+    proxy_pass http://hubot;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  }
+}
