@@ -11,4 +11,4 @@ hooks:
   ApplicationStart:
     - location: deploy/application-start.sh
   ValidateService:
-    - location: depoy/validate-service.sh
+    - location: deploy/validate-service.sh
